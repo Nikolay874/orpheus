@@ -1,0 +1,13 @@
+# 1️⃣ Первый этап: Сборка React-приложения
+FROM node:18 AS builder
+
+WORKDIR /work/orpheus_frontend
+COPY orpheus_frontend/package.json .
+COPY orpheus_frontend/package-lock.json .
+
+RUN npm install
+
+COPY orpheus_frontend/ .
+RUN npm run build
+
+

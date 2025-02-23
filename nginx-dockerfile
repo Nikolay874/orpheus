@@ -1,0 +1,7 @@
+FROM nginx:alpine AS production
+WORKDIR /usr/share/nginx/html
+COPY orpheus_frontend/build ./
+
+# Открываем порт для Nginx
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

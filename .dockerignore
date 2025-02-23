@@ -1,0 +1,12 @@
+**/.vagga
+**/.git
+**/.idea
+**/.lets
+**/.venv
+**/.bash_history
+**/.python_history
+**/.pycharm_helpers
+**/.vscode
+
+**/*.pyc
+**/*.map

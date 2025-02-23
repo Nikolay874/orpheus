@@ -1,0 +1,8 @@
+site_name:
+repo_url:
+repo_name:
+edit_uri:
+site_dir: public
+nav:
+    - Index: 'index.md'
+    - BL: 'orpheus.md'

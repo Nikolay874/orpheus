@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend-dockerfile
+    volumes:
+      - ./orpheus_frontend:/work/orpheus_frontend
+      - ./orpheus_frontend/package-lock.json:/work/orpheus_frontend/package-lock.json

@@ -1,0 +1,83 @@
+version: "3.8"
+
+
+volumes:
+  certs:
+    driver: local
+  esdata01:
+    driver: local
+  kibanadata:
+    driver: local
+  metricbeatdata01:
+    driver: local
+  filebeatdata01:
+    driver: local
+  logstashdata01:
+    driver: local
+
+services:
+  app: &main
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/work
+  static-server:
+    build:
+      context: .
+      dockerfile: nginx-dockerfile
+    volumes:
+      - ./orpheus_frontend/build:/usr/share/nginx/html
+    ports:
+      - 3000:80
+  server:
+    <<: *main
+    ports:
+      - 8888:8888
+    depends_on:
+      - redis
+#      - es01
+    command: python3.11 runner.py server
+    volumes:
+      - .:/work
+  celery-worker:
+    <<: *main
+    depends_on:
+      - redis
+    command: python3.11 runner.py celery_worker
+
+  celery-beat:
+    <<: *main
+    depends_on:
+      - redis
+    command: python3.11 runner.py celery_beat
+
+  redis: &redis
+    image: redis:latest
+    restart: always
+#    container_name: redis-dev
+#    ports:
+#      - '6379:6379'
+
+  redis-test:
+    <<: *redis
+
+  elasticsearch:
+    image: elasticsearch:8.16.3
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=true"
+      - "ELASTIC_PASSWORD=password"
+      - "ES_JAVA_OPTS=-Xms3g -Xmx3g"
+      - "cluster.routing.allocation.disk.threshold_enabled=false"
+  kibana:
+    image: kibana:7.8.1
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./esdata:/usr/share/elasticsearch/data
+    ports:
+      - 5601:5601

@@ -1,0 +1,76 @@
+shell: bash
+
+
+commands:
+  server:
+    description: Run server
+    depends:
+      - build
+    options: |
+      Usage:
+        lets server [--config=<config>]
+      Options:
+        --config=<config> Set config yaml file
+    cmd: |
+      if [[ ${LETSOPT_CONFIG} == '' ]]; then
+        LETSOPT_CONFIG=config/dev/app.yaml
+      fi;
+      echo $LETSOPT_CONFIG
+      CONFIG=$LETSOPT_CONFIG docker compose up server
+
+  static-server:
+    cmd: docker compose up static-server
+  build-celery:
+    description: Rebuid image for celery
+    cmd: docker-compose build celery
+
+  beat:
+    description: Run celery worker for dev purposes
+    depends:
+      - build
+    options: |
+      Usage:
+        lets beat <config>
+    cmd: CONFIG=$LETSOPT_CONFIG docker-compose run celery-beat
+
+  worker:
+    description: Run celery worker for dev purposes
+    depends:
+      - build
+    options: |
+      Usage:
+        lets worker <config>
+    cmd: CONFIG=$LETSOPT_CONFIG docker-compose run celery-worker
+
+  exec:
+    description: Run exec container by name
+    depends:
+      - build
+    options: |
+      Usage:
+        lets exec <name>
+    cmd: docker run --rm -it --entrypoint bash $LETSOPT_NAME
+
+  es:
+    description: Run elasticsearch
+    cmd: docker compose up elasticsearch
+
+
+
+  redis:
+    description: Run redis
+    cmd: |
+      docker compose up redis
+  build:
+    description: Build app
+    checksum:
+      - ./requirements/base/requirements.txt
+    persist_checksum: true
+    cmd: |
+      if [[ ${LETS_CHECKSUM_CHANGED} == true ]]; then
+        docker-compose build app
+      fi;
+
+  clear:
+    cmd: |
+      docker-compose down -v 
